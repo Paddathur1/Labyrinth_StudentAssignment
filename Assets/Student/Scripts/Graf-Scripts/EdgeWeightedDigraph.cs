@@ -4,6 +4,7 @@ using UnityEngine;
 public class EdgeWeightedDigraph : MonoBehaviour
 {
     private readonly int vertices; // number of vertices
+    private List<Vector2Int> vertexPositions; // positions of vertices in the grid
     private int edges; // number of edges
     private List<List<DirectedEdge>> adj; // adjacency lists
     public EdgeWeightedDigraph(int vertices)
@@ -18,6 +19,15 @@ public class EdgeWeightedDigraph : MonoBehaviour
     // See Exercise 4.4.2.
     public int Vertices() { return vertices; }
     public int Edge() { return edges; }
+    public void SetVertexPositions(List<Vector2Int> positions)
+    {
+        vertexPositions = positions;
+    }
+    public List<Vector2Int> GetVertexPositions()
+    {
+        return vertexPositions;
+    }
+
     public void AddEdge(DirectedEdge e)
     {
         adj[e.From()].Add(e);
@@ -25,6 +35,8 @@ public class EdgeWeightedDigraph : MonoBehaviour
     }
     public IEnumerable<DirectedEdge> Adj(int v)
     { return adj[v]; }
+    public int AdjTotal()
+    { return adj.Count; }
     public IEnumerable<DirectedEdge> Edges()
     {
         List<DirectedEdge> list = new List<DirectedEdge>();
@@ -33,4 +45,6 @@ public class EdgeWeightedDigraph : MonoBehaviour
                 list.Add(e);
         return list;
     }
+
+
 }

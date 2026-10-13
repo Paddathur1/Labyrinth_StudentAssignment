@@ -15,7 +15,39 @@ public static class PathfindingAlgorithm
         Debug.Log(graph.Edges());
 
         Debug.Log("FindShortestPath is not implemented.");
-        return null;
+        List<Vector2Int> path = BreadthFirstSearch(mapData, graph);
+        return path;
+    }
+
+    public static List<Vector2Int> BreadthFirstSearch(IMapData mapData, EdgeWeightedDigraph graph)
+    {
+        int v = graph.AdjTotal();
+        bool[] visited = new bool[v];
+        List<Vector2Int> res = new List<Vector2Int>();
+        List<Vector2Int> vertexPositions = graph.GetVertexPositions();
+
+
+        int src = 0;
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        visited[src] = true;
+        queue.Enqueue(graph.GetVertexPositions()[src]);
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            res.Add(current);
+
+            List<DirectedEdge> adjList = (List<DirectedEdge>)graph.Adj(vertexPositions.IndexOf(current)); // Ensure adjacency list is initialized for vertex i
+            foreach (DirectedEdge edge in adjList)
+            {
+                if (!visited[edge.To()])
+                    {
+                        visited[edge.To()] = true;
+                        queue.Enqueue(vertexPositions[edge.To()]);
+                    }
+            }
+        }
+        return res;
     }
 
     public static EdgeWeightedDigraph MakeGraf(Vector2Int start, IMapData mapData)
@@ -27,27 +59,27 @@ public static class PathfindingAlgorithm
         int amountOfVertices = mapData.Width * mapData.Height;
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(amountOfVertices);
         List<Vector2Int> createdVertices = new List<Vector2Int>();
-        bool[] visted = new bool[amountOfVertices];
-        for (int i = 0; i < visted.Length - 1; i++)
-        {
-            visted[i] = false;
-        }
+        
 
         createdVertices.Add(start);
         //GetNeighbors(start, mapData, graph, createdVertices, visted);
 
         for (int i = 0; i < amountOfVertices; i++)
         {
-            GetNeighbors(createdVertices[i], mapData, graph, createdVertices, visted);
+            GetNeighbors(createdVertices[i], mapData, graph, createdVertices);
         }
+
+        graph.SetVertexPositions(createdVertices);
 
         stopwatch.Stop();
         Debug.Log("Stopped MakeGraf: Elapsed time: " + stopwatch.ElapsedMilliseconds /1000 + " seconds");
 
+        
+
         return graph;
     }
 
-    public static void GetNeighbors(Vector2Int position, IMapData mapData, EdgeWeightedDigraph graph, List<Vector2Int> createdVertices, bool[] visted)
+    public static void GetNeighbors(Vector2Int position, IMapData mapData, EdgeWeightedDigraph graph, List<Vector2Int> createdVertices)
     {
         // Ensure the current position is present in createdVertices.
         if (!createdVertices.Contains(position))
@@ -112,10 +144,10 @@ public static class PathfindingAlgorithm
 
         // Mark position as visited if we can get a valid index.
         int posIndex = createdVertices.IndexOf(position);
-        if (posIndex >= 0 && posIndex < visted.Length)
-        {
-            visted[posIndex] = true;
-        }
+        //if (posIndex >= 0 && posIndex < visted.Length)
+        //{
+        //    visted[posIndex] = true;
+        //}
     }
 
     private static float GetMovementCost(Vector2Int from, Vector2Int to, IMapData mapData)

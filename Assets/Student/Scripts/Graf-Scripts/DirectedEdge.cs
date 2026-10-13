@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class DirectedEdge : MonoBehaviour
+public class DirectedEdge
 {
     private readonly int v; // edge source
     private readonly int w; // edge target
