@@ -15,38 +15,66 @@ public static class PathfindingAlgorithm
         Debug.Log(graph.Edges());
 
         Debug.Log("FindShortestPath is not implemented.");
-        List<Vector2Int> path = BreadthFirstSearch(mapData, graph);
+        List<Vector2Int> path = BreadthFirstSearch(mapData, graph, start, goal);
         return path;
     }
 
-    public static List<Vector2Int> BreadthFirstSearch(IMapData mapData, EdgeWeightedDigraph graph)
+    public static List<Vector2Int> BreadthFirstSearch(IMapData mapData, EdgeWeightedDigraph graph, Vector2Int start, Vector2Int goal)
     {
         int v = graph.AdjTotal();
         bool[] visited = new bool[v];
         List<Vector2Int> res = new List<Vector2Int>();
         List<Vector2Int> vertexPositions = graph.GetVertexPositions();
 
+        int src = vertexPositions.IndexOf(start);
+        int dest = vertexPositions.IndexOf(goal);
 
-        int src = 0;
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        //prevent crash if src or dest are out of bounds
+        if (src == -1 || dest == -1)
+            return res;
+
+        //travelpath to keep track of the traveled indices for reconstruction of the path
+        int[] travelpath = new int[v];
+        for (int i = 0; i < v; i++) travelpath[i] = -1;
+
+        Queue<int> queue = new Queue<int>();
         visited[src] = true;
-        queue.Enqueue(graph.GetVertexPositions()[src]);
+        queue.Enqueue(src);
+
+        bool found = false;
 
         while (queue.Count > 0)
         {
-            Vector2Int current = queue.Dequeue();
-            res.Add(current);
+            int current = queue.Dequeue();
 
-            List<DirectedEdge> adjList = (List<DirectedEdge>)graph.Adj(vertexPositions.IndexOf(current)); // Ensure adjacency list is initialized for vertex i
+            if (current == dest)
+            {
+                found = true;
+                break;
+            }
+            List<DirectedEdge> adjList = (List<DirectedEdge>)graph.Adj(current);
+            //every directed edgw in the adjacency list is visited, neighbors added to the travelpath list and enqueued
             foreach (DirectedEdge edge in adjList)
             {
-                if (!visited[edge.To()])
-                    {
-                        visited[edge.To()] = true;
-                        queue.Enqueue(vertexPositions[edge.To()]);
-                    }
+                int next = edge.To();
+                if (!visited[next])
+                {
+                    visited[next] = true;
+                    travelpath[next] = current;
+                    queue.Enqueue(next);
+                }
             }
         }
+
+        //if we dont find the goal we return
+        if (!found)
+            return res;
+
+        //add the travelpath into our res and reverse it for out path
+        for (int at = dest; at != -1; at = travelpath[at])
+            res.Add(vertexPositions[at]);
+
+        res.Reverse();
         return res;
     }
 
@@ -56,6 +84,7 @@ public static class PathfindingAlgorithm
         Debug.Log("starting MakeGraf");
         stopwatch.Start();
 
+        //upper bounds of the vertices
         int amountOfVertices = mapData.Width * mapData.Height;
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(amountOfVertices);
         List<Vector2Int> createdVertices = new List<Vector2Int>();
@@ -64,7 +93,7 @@ public static class PathfindingAlgorithm
         createdVertices.Add(start);
         //GetNeighbors(start, mapData, graph, createdVertices, visted);
 
-        for (int i = 0; i < amountOfVertices; i++)
+        for (int i = 0; i < createdVertices.Count; i++)
         {
             GetNeighbors(createdVertices[i], mapData, graph, createdVertices);
         }
