@@ -19,6 +19,11 @@ public static class PathfindingAlgorithm
         return path;
     }
 
+    public static void DijkstraSearch(IMapData mapData, EdgeWeightedDigraph graph, Vector2Int start, Vector2Int goal)
+    {
+
+    }
+
     public static List<Vector2Int> BreadthFirstSearch(IMapData mapData, EdgeWeightedDigraph graph, Vector2Int start, Vector2Int goal)
     {
         int v = graph.AdjTotal();
