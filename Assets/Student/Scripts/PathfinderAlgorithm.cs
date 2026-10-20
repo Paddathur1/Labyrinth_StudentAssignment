@@ -28,7 +28,7 @@ public static class PathfindingAlgorithm
     {
         int v = graph.AdjTotal();
         bool[] visited = new bool[v];
-        List<Vector2Int> res = new List<Vector2Int>();
+        List<Vector2Int> path = new List<Vector2Int>();
         List<Vector2Int> vertexPositions = graph.GetVertexPositions();
 
         int src = vertexPositions.IndexOf(start);
@@ -36,7 +36,7 @@ public static class PathfindingAlgorithm
 
         //prevent crash if src or dest are out of bounds
         if (src == -1 || dest == -1)
-            return res;
+            return path;
 
         //travelpath to keep track of the traveled indices for reconstruction of the path
         int[] travelpath = new int[v];
@@ -73,14 +73,14 @@ public static class PathfindingAlgorithm
 
         //if we dont find the goal we return
         if (!found)
-            return res;
+            return path;
 
         //add the travelpath into our res and reverse it for out path
         for (int at = dest; at != -1; at = travelpath[at])
-            res.Add(vertexPositions[at]);
+            path.Add(vertexPositions[at]);
 
-        res.Reverse();
-        return res;
+        path.Reverse();
+        return path;
     }
 
     public static EdgeWeightedDigraph MakeGraf(Vector2Int start, IMapData mapData)
