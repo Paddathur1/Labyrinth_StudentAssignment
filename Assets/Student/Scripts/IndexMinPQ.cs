@@ -18,18 +18,18 @@ public class IndexMinPQ
         for (int i = 0; i <= MaxN; i++) qp[i] = -1;
     }
 
-    public bool isEmpty()
+    public bool IsEmpty()
     {
         return n == 0;
     }
 
-    public void insert(int k, Key key)
+    public void Insert(int k, Key key)
     {
         n++;
         qp[k] = n;
         pq[n] = k;
         keys[k] = key;
-        swim(n);
+        Swim(n);
     }
     public  Key min()
     {
@@ -39,36 +39,39 @@ public class IndexMinPQ
     public int DelMin()
     {
         int indexOfMin = pq[1];
-        exch(1, n--);
-        sink(1);
+        Exch(1, n--);
+        Sink(1);
         keys[pq[n + 1]] = default(Key);
         qp[pq[n + 1]] = -1;
         return indexOfMin;
 
     }
 
-    private void swim(int k)
+    private void Swim(int k)
     {
-        while (k > 1 && greater(k / 2, k))
+        while (k > 1 && Greater(k / 2, k))
         {
-            exch(k / 2, k);
+            Exch(k / 2, k);
             k = k / 2;
         }
     }
 
-    private void sink(int k)
+    private void Sink(int k)
     {
         while (2 * k <=n)
         {
             int j = 2 * k;
 
-            if (j < n && greater(j, j + 1)) j++;
+            if (j < n && Greater(j, j + 1)) j++;
 
-            if (!greater(k, j)) break;
+            if (!Greater(k, j)) break;
+
+            Exch(k, j);
+            k = j;
         }
     }
 
-    private void exch(int i, int j)
+    private void Exch(int i, int j)
     {
         int swap = pq[i];
         pq[i] = pq[j];
@@ -78,7 +81,7 @@ public class IndexMinPQ
         qp[pq[j]] = j;
     }
 
-    private bool greater(int i, int j)
+    private bool Greater(int i, int j)
     {
         return keys[pq[i]].CompareTo(keys[pq[j]]) > 0;
     }

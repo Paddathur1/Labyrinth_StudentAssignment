@@ -98,6 +98,8 @@ public static class PathfindingAlgorithm
         createdVertices.Add(start);
         //GetNeighbors(start, mapData, graph, createdVertices, visted);
 
+        List<JumpConnection> jumps = new();
+
         for (int i = 0; i < createdVertices.Count; i++)
         {
             GetNeighbors(createdVertices[i], mapData, graph, createdVertices);
@@ -174,6 +176,18 @@ public static class PathfindingAlgorithm
                     graph.AddEdge(newEdge);
                 }
             }
+        }
+
+        List<JumpConnection> jumps =  mapData.GetJumpsFrom(position);
+
+        foreach (JumpConnection item in jumps)
+        {
+            Vector2Int to = item.To;
+            int fromIndex = createdVertices.IndexOf(position);
+            int toIndex = createdVertices.IndexOf(to);
+            float cost = 0;
+            mapData.TryGetJumpCost(position, to, out cost);
+            graph.AddEdge(new DirectedEdge(fromIndex, toIndex, cost));
         }
 
         // Mark position as visited if we can get a valid index.

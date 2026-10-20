@@ -6,25 +6,26 @@
 //{
 //    private DirectedEdge[] edgeTo;
 //    private double[] distTo;
-//    private IndexMinPQ priorotyQueue;
+//    private IndexMinPQ prioQueue;
 
 //    public DijkstraAlgorith(EdgeWeightedDigraph graf, int startIndex)
 //    {
+        
 //        edgeTo = new DirectedEdge[startIndex];
 //        distTo = new double[startIndex];
-//        priorotyQueue = new();
+//        prioQueue = new IndexMinPQ(graf.Edge());
 
 //        for (int vertex = 0; vertex < graf.Vertices(); vertex++)
 //        {
-//            distTo[vertex] = double.PositiveInfinity; 
+//            distTo[vertex] = double.PositiveInfinity;
 //        }
 //        distTo[startIndex] = 0;
 
-//        priorotyQueue.Insert(startIndex, 0);
+//        prioQueue.Insert(startIndex, 0);
 
-//        while (!priorotyQueue.IsEmpty())
+//        while (!prioQueue.IsEmpty())
 //        {
-//            relax(graf, priorotyQueue.Dequeue());
+//            relax(graf, prioQueue.Dequeue());
 //        }
 //    }
 //    private void relax(EdgeWeightedDigraph graf, int vertexIndex)
@@ -36,8 +37,8 @@
 //            {
 //                distTo[w] = distTo[vertexIndex] + edge.Weight();
 //                edgeTo[w] = edge;
-//                if (priorotyQueue.contains(w)) priorotyQueue.change(w, distTo[w]);
-//                else priorotyQueue.insert(w, distTo[w]);
+//                if (prioQueue.contains(w)) prioQueue.change(w, distTo[w]);
+//                else prioQueue.insert(w, distTo[w]);
 //            }
 //        }
 //    }
@@ -49,8 +50,8 @@
 //        {
 //            distTo[w] = distTo[v] + edge.Weight();
 //            edgeTo[w] = edge;
-//            if (priorotyQueue.contains(w)) priorotyQueue.decreaseKey(w, distTo[w]);
-//            else priorotyQueue.insert(w, distTo[w]);
+//            if (prioQueue.contains(w)) prioQueue.decreaseKey(w, distTo[w]);
+//            else prioQueue.insert(w, distTo[w]);
 //        }
 //    }
 
