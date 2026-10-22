@@ -9,10 +9,10 @@ public class IndexMinPQ
     private int n;
     private int[] pq;
     private int[] qp;
-    private Key[] keys;
+    private double[] keys;
     public IndexMinPQ(int MaxN)
     {
-        keys = new Key[MaxN + 1];
+        keys = new double[MaxN + 1];
         pq = new int[MaxN + 1];
         qp = new int[MaxN + 1];
         for (int i = 0; i <= MaxN; i++) qp[i] = -1;
@@ -23,7 +23,7 @@ public class IndexMinPQ
         return n == 0;
     }
 
-    public void Insert(int k, Key key)
+    public void Insert(int k, double key)
     {
         n++;
         qp[k] = n;
@@ -31,9 +31,9 @@ public class IndexMinPQ
         keys[k] = key;
         Swim(n);
     }
-    public  Key min()
+    public  int min()
     {
-        return keys[pq[1]]; 
+        return pq[1]; 
     }
 
     public int DelMin()
@@ -41,10 +41,28 @@ public class IndexMinPQ
         int indexOfMin = pq[1];
         Exch(1, n--);
         Sink(1);
-        keys[pq[n + 1]] = default(Key);
+        keys[indexOfMin] = 0;
         qp[pq[n + 1]] = -1;
         return indexOfMin;
 
+    }
+
+    public  bool contains(int i)
+    {
+        return qp[i] !=- 1;
+    }
+
+    public void change(int i, double key)
+    {
+        keys[i] = key;
+        Swim(qp[i]);
+        Sink(qp[i]);
+    }
+
+    public void decreaseKey(int i, double key)
+    {
+        keys[i] = key;
+        Swim(qp[i]);
     }
 
     private void Swim(int k)

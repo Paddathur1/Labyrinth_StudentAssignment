@@ -10,12 +10,29 @@ public static class PathfindingAlgorithm
     public static List<Vector2Int> FindShortestPath(Vector2Int start, Vector2Int goal, IMapData mapData)
     {
         EdgeWeightedDigraph graph = MakeGraf(start, mapData);
+        List<Vector2Int> vertexPositions = graph.GetVertexPositions();
+
+        int src = vertexPositions.IndexOf(start);
+        int dest = vertexPositions.IndexOf(goal);
+
+        var path = new List<Vector2Int>();
+        if (src == -1 || dest == -1) return path;
+        if (src == dest) { path.Add(start); return path; }
+
+        var algo = new DijkstraAlgorith(graph, src);
+
+        if (!algo.HasPathTo(dest)) return path;
+
+        path.Add(vertexPositions[src]);
+        foreach (DirectedEdge e in algo.pathTo(dest))
+            path.Add(vertexPositions[e.To()]);
+
         // Most of your solution should be implemented in this method.
 
         Debug.Log(graph.Edges());
 
         Debug.Log("FindShortestPath is not implemented.");
-        List<Vector2Int> path = BreadthFirstSearch(mapData, graph, start, goal);
+        //List<Vector2Int> path = BreadthFirstSearch(mapData, graph, start, goal);
         return path;
     }
 
