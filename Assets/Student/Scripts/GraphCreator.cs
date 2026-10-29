@@ -3,125 +3,112 @@ using UnityEngine;
 
 public static class GraphCreator
 {
-    public static EdgeWeightedDigraph MakeGraf(Vector2Int start, IMapData mapData)
+    private static readonly Vector2Int[] Directions =
     {
-        System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-        Debug.Log("starting MakeGraf");
-        stopwatch.Start();
+        new Vector2Int(0, 1),   // Up
+        new Vector2Int(0, -1),  // Down
+        new Vector2Int(-1, 0),  // Left
+        new Vector2Int(1, 0)    // Right
+    };
 
-        //upper bounds of the vertices
+    public static EdgeWeightedDigraph MakeGraf(Vector2Int start,  IMapData mapData)
+    {
+        System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+        Debug.Log("Starting MakeGraf");
+
+        // Upper bound of the vertices.
         int amountOfVertices = mapData.Width * mapData.Height;
         EdgeWeightedDigraph graph = new EdgeWeightedDigraph(amountOfVertices);
+
         List<Vector2Int> createdVertices = new List<Vector2Int>();
+        Dictionary<Vector2Int, int> vertexIndices = new Dictionary<Vector2Int, int>();
 
-
-        createdVertices.Add(start);
-        //GetNeighbors(start, mapData, graph, createdVertices, visted);
-
-
+        AddVertex(start, createdVertices, vertexIndices);
 
         for (int i = 0; i < createdVertices.Count; i++)
         {
-            GetNeighbors(createdVertices[i], mapData, graph, createdVertices);
+            GetNeighbors(createdVertices[i], mapData, graph, createdVertices, vertexIndices);
         }
 
         graph.SetVertexPositions(createdVertices);
 
-
-
         stopwatch.Stop();
-        Debug.Log("Stopped MakeGraf: Elapsed time: " + stopwatch.ElapsedMilliseconds + " milliseconds");
 
-
+        Debug.Log("Stopped MakeGraf: Elapsed time: " + stopwatch.Elapsed.TotalMilliseconds.ToString("F3") + " milliseconds");
 
         return graph;
     }
 
-    public static void GetNeighbors(Vector2Int position, IMapData mapData, EdgeWeightedDigraph graph, List<Vector2Int> createdVertices)
+    public static void GetNeighbors(
+        Vector2Int position,
+        IMapData mapData,
+        EdgeWeightedDigraph graph,
+        List<Vector2Int> createdVertices,
+        Dictionary<Vector2Int, int> vertexIndices)
     {
         // Ensure the current position is present in createdVertices.
-        if (!createdVertices.Contains(position))
-        {
-            createdVertices.Add(position);
-        }
+        int fromIndex = AddVertex(
+            position,
+            createdVertices,
+            vertexIndices);
 
-        Vector2Int[] directions = new Vector2Int[]
+        for (int d = 0; d < Directions.Length; d++)
         {
-            new Vector2Int(0, 1),   // Up
-            new Vector2Int(0, -1),  // Down
-            new Vector2Int(-1, 0),  // Left
-            new Vector2Int(1, 0)    // Right
-        };
-
-        for (int d = 0; d < directions.Length; d++)
-        {
-            Vector2Int dir = directions[d];
-            Vector2Int neighborPos = position + dir;
+            Vector2Int neighborPos = position + Directions[d];
 
             // Bounds check: skip neighbors outside the map.
             if (neighborPos.x < 0 || neighborPos.x >= mapData.Width || neighborPos.y < 0 || neighborPos.y >= mapData.Height)
+            {
                 continue;
+            }
 
             // Skip if movement blocked.
             if (PathfindingAlgorithm.IsMovementBlocked(position, neighborPos, mapData))
+            {
                 continue;
-
-            // Ensure we have a valid index for 'position'.
-            int fromIndex = createdVertices.IndexOf(position);
-            if (fromIndex == -1)
-            {
-                // Shouldn't happen because we ensured containment above, but guard anyway.
-                createdVertices.Add(position);
-                fromIndex = createdVertices.IndexOf(position);
             }
 
-            // If neighbor not yet created, add it and then add edge.
-            if (!createdVertices.Contains(neighborPos))
-            {
-                createdVertices.Add(neighborPos);
-                int toIndex = createdVertices.IndexOf(neighborPos);
-                if (toIndex != -1)
-                {
-                    float cost = PathfindingAlgorithm.GetMovementCost(position, neighborPos, mapData);
-                    DirectedEdge newEdge = new DirectedEdge(fromIndex, toIndex, cost);
-                    graph.AddEdge(newEdge);
-                }
-            }
-            else
-            {
-                // Neighbor already exists; get its index safely and add edge if valid.
-                int toIndex = createdVertices.IndexOf(neighborPos);
-                if (toIndex != -1 && fromIndex != toIndex)
-                {
-                    float cost = PathfindingAlgorithm.GetMovementCost(position, neighborPos, mapData);
-                    DirectedEdge newEdge = new DirectedEdge(fromIndex, toIndex, cost);
-                    graph.AddEdge(newEdge);
-                }
-            }
+            int toIndex = AddVertex(neighborPos, createdVertices, vertexIndices);
+
+            float cost = PathfindingAlgorithm.GetMovementCost(position, neighborPos, mapData);
+
+            graph.AddEdge(new DirectedEdge(fromIndex, toIndex, cost));
         }
 
         List<JumpConnection> jumps = mapData.GetJumpsFrom(position);
 
         foreach (JumpConnection item in jumps)
         {
-            if (!createdVertices.Contains(item.To))
-            {
-                createdVertices.Add(item.To);
-            }
             Vector2Int to = item.To;
-            int fromIndex = createdVertices.IndexOf(position);
-            int toIndex = createdVertices.IndexOf(to);
-            float cost = 0;
+
+            int toIndex = AddVertex(to, createdVertices, vertexIndices);
+
+            float cost = 0f;
             mapData.TryGetJumpCost(position, to, out cost);
+
             graph.AddEdge(new DirectedEdge(fromIndex, toIndex, cost));
         }
 
-
         // Mark position as visited if we can get a valid index.
-        int posIndex = createdVertices.IndexOf(position);
-        //if (posIndex >= 0 && posIndex < visted.Length)
-        //{
-        //    visted[posIndex] = true;
-        //}
+        // The vertex index dictionary now provides the visited/index lookup.
+    }
+
+    private static int AddVertex(
+        Vector2Int position,
+        List<Vector2Int> createdVertices,
+        Dictionary<Vector2Int, int> vertexIndices)
+    {
+        if (vertexIndices.TryGetValue(position, out int existingIndex))
+        {
+            return existingIndex;
+        }
+
+        int newIndex = createdVertices.Count;
+
+        createdVertices.Add(position);
+        vertexIndices.Add(position, newIndex);
+
+        return newIndex;
     }
 }
