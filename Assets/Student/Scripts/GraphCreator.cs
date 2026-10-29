@@ -94,10 +94,7 @@ public static class GraphCreator
         // The vertex index dictionary now provides the visited/index lookup.
     }
 
-    private static int AddVertex(
-        Vector2Int position,
-        List<Vector2Int> createdVertices,
-        Dictionary<Vector2Int, int> vertexIndices)
+    private static int AddVertex(Vector2Int position, List<Vector2Int> createdVertices, Dictionary<Vector2Int, int> vertexIndices)
     {
         if (vertexIndices.TryGetValue(position, out int existingIndex))
         {
