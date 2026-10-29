@@ -34,6 +34,7 @@ public class DijkstraAlgorith
     public IEnumerable<DirectedEdge> pathTo(int v)
     {
         if (!HasPathTo(v)) yield break;
+
         var stack = new Stack<DirectedEdge>();
         for (var e = edgeTo[v]; e != null; e = edgeTo[e.From()])
             stack.Push(e);
