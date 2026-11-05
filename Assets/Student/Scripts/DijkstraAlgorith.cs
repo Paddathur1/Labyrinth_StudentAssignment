@@ -15,6 +15,7 @@ public class DijkstraAlgorith
         distTo = new double[v];
         prioQueue = new IndexMinPQ(v);
 
+        //sets all ditances to infinity except for the starting vertex, which is set to 0. The starting vertex is then added to the priority queue.
         for (int vertex = 0; vertex < graf.Vertices(); vertex++)
         {
             distTo[vertex] = double.PositiveInfinity;
@@ -23,6 +24,9 @@ public class DijkstraAlgorith
 
         prioQueue.Insert(startIndex, 0);
 
+        //relaxes the edges of the graph until the priority queue is empty,
+        //which means that all vertices have been processed and
+        //the shortest paths from the starting vertex to all other vertices have been found.
         while (!prioQueue.IsEmpty())
         {
             relax(graf, prioQueue.DelMin());
@@ -40,6 +44,8 @@ public class DijkstraAlgorith
             stack.Push(e);
         foreach (var e in stack) yield return e;
     }
+
+    //relaxes all edges adjacent to a given vertex, updating the shortest path estimates and the priority queue as necessary.
     private void relax(EdgeWeightedDigraph graf, int vertexIndex)
     {
         foreach (DirectedEdge edge in graf.Adj(vertexIndex))
@@ -55,6 +61,8 @@ public class DijkstraAlgorith
         }
     }
 
+    //same as the relax method above but for a single edge instead of all edges adjacent to a vertex
+    //made becouse we did not know if we would use this or the other relax method, so we made both
     private void relax(DirectedEdge edge)
     {
         int v = edge.From(), w = edge.To();

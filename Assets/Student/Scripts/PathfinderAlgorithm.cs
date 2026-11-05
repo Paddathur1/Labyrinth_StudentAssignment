@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 public static class PathfindingAlgorithm
 {
-    // TODO: Implement the pathfinding assignment here.
+    static bool UseDijkstra = true;
     // Find the lowest-cost path from start to goal using the map dimensions, wall costs and directed jumps exposed by IMapData.
     public static List<Vector2Int> FindShortestPath(Vector2Int start, Vector2Int goal, IMapData mapData)
     {
@@ -17,24 +17,31 @@ public static class PathfindingAlgorithm
         Debug.Log("starting pathfinding");
         stopwatch.Start();
 
-        int src = vertexPositions.IndexOf(start);
-        int dest = vertexPositions.IndexOf(goal);
+        List<Vector2Int> path;
 
-        var path = new List<Vector2Int>();
-        if (src == -1 || dest == -1) return path;
-        if (src == dest) { path.Add(start); return path; }
+        if (UseDijkstra)
+        {
+            int src = vertexPositions.IndexOf(start);
+            int dest = vertexPositions.IndexOf(goal);
 
-        var algo = new DijkstraAlgorith(graph, src);
+            path = new List<Vector2Int>();
+            if (src == -1 || dest == -1) return path;
+            if (src == dest) { path.Add(start); return path; }
 
-        if (!algo.HasPathTo(dest)) return path;
+            DijkstraAlgorith algo = new DijkstraAlgorith(graph, src);
 
-        path.Add(vertexPositions[src]);
-        foreach (DirectedEdge e in algo.pathTo(dest))
-            path.Add(vertexPositions[e.To()]);
+            //if there is no possible path to the destination, return an empty path
+            if (!algo.HasPathTo(dest)) return path;
 
+            path.Add(vertexPositions[src]);
+            foreach (DirectedEdge e in algo.pathTo(dest))
+                path.Add(vertexPositions[e.To()]);
+        }
+        else
+        {
+            path = BreadthFirstSearch(mapData, graph, start, goal);
+        }
 
-
-        //List<Vector2Int> path = BreadthFirstSearch(mapData, graph, start, goal);
 
         stopwatch.Stop();
         Debug.Log("Stopped Pathfinding: Elapsed time: " + stopwatch.ElapsedMilliseconds + " milliseconds");
@@ -100,8 +107,6 @@ public static class PathfindingAlgorithm
         path.Reverse();
         return path;
     }
-
-    
 
     public static float GetMovementCost(Vector2Int from, Vector2Int to, IMapData mapData)
     {

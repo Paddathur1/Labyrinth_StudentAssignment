@@ -40,12 +40,8 @@ public static class GraphCreator
         return graph;
     }
 
-    public static void GetNeighbors(
-        Vector2Int position,
-        IMapData mapData,
-        EdgeWeightedDigraph graph,
-        List<Vector2Int> createdVertices,
-        Dictionary<Vector2Int, int> vertexIndices)
+    public static void GetNeighbors(Vector2Int position, IMapData mapData, EdgeWeightedDigraph graph,
+        List<Vector2Int> createdVertices, Dictionary<Vector2Int, int> vertexIndices)
     {
         // Ensure the current position is present in createdVertices.
         int fromIndex = AddVertex(
@@ -91,7 +87,6 @@ public static class GraphCreator
         }
 
         // Mark position as visited if we can get a valid index.
-        // The vertex index dictionary now provides the visited/index lookup.
     }
 
     private static int AddVertex(Vector2Int position, List<Vector2Int> createdVertices, Dictionary<Vector2Int, int> vertexIndices)
